@@ -12,7 +12,6 @@ const $verse = $('#verse')
 $coupletblock.fadeOut()
 $verseblock.fadeOut()
 
-const sendWithWS = (ws, obj) => ws.send(JSON.stringify(obj))
 
 const setVerseText = text => {
   $verse.text(text)
@@ -41,7 +40,7 @@ const resizeElementFont = (el, initSize) => {
     el.css('overflow', '')
     return fSize
   }
-
+  
   let fSize = getSize(initSize)
   el.css('font-size', fSize + '%')
 }
@@ -85,14 +84,35 @@ const handleMessage = message => {
       }
     }[message.object]
   }[message.type]
-
+  
   handlerFunc()
 }
 
-const ws = new WebSocket(`ws://${WSIP}:${WSPort}`)
-ws.onopen = () => sendWithWS(ws, {
-  type: "reciever",
-  object: "auth",
-  data: ""
-})
-ws.onmessage = mess => handleMessage(mess.data)
+const sendWithWS = (ws, obj) => ws.send(JSON.stringify(obj))
+
+const ws = new WSWrapper(WSIP, WSPort)
+
+function WSWrapper(WSIP, WSPort) {
+  this._ws = new WebSocket(`ws://${WSIP}:${WSPort}`)
+
+  this.onopen = () => sendWithWS(this._ws, {
+    type: "reciever",
+    object: "auth",
+    data: ""
+  })
+  this.onmessage = mess => handleMessage(mess.data)
+  this.onclose = () => {
+    setTimeout(() => {
+      this._ws = new WebSocket(`ws://${WSIP}:${WSPort}`)
+      this._ws.onopen = this.onopen
+      this._ws.onmessage = this.onmessage
+      this._ws.onclose = this.onclose
+    }, 1000)
+  }
+
+  this._ws.onopen = this.onopen
+  this._ws.onmessage = this.onmessage
+  this._ws.onclose = this.onclose
+  
+  this.send = this._ws.send
+}
