@@ -32,6 +32,9 @@ body {
   display: flex !important;
   width: 100% !important;
   height: 100% !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
 }
 
 .block_subblockC__couplet {  
