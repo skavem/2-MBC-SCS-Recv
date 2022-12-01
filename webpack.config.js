@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require("copy-webpack-plugin")
 const path = require('path')
 
 module.exports = {
@@ -7,7 +8,7 @@ module.exports = {
 
   output: {
 		path: `${__dirname}/dist`,
-		filename: 'bundle.js',
+		filename: 'bundle.js'
   },
 
   module: {
@@ -32,8 +33,17 @@ module.exports = {
 
 	plugins: [
 		new HtmlWebpackPlugin({
-			title: 'recv',
+			filename: 'recv.html',
+			template: './src/recv.html'
+		}),
+		new HtmlWebpackPlugin({
+			filename: 'recv-qr.html',
 			template: './src/recv-qr.html'
+		}),
+		new CopyPlugin({
+			patterns: [
+				{from: 'public', to: ''}
+			]
 		})
 	]
 };
